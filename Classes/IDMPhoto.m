@@ -140,10 +140,12 @@ caption = _caption;
 			
 			[[SDWebImageManager sharedManager] loadImageWithURL:_photoURL options:SDWebImageRetryFailed | SDWebImageAllowInvalidSSLCertificates | SDWebImageAvoidAutoSetImage | SDWebImageContinueInBackground progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
 				CGFloat progress = ((CGFloat)receivedSize)/((CGFloat)expectedSize);
-				
-				if (self.progressUpdateBlock) {
-					self.progressUpdateBlock(progress);
-				}
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (self.progressUpdateBlock) {
+                        self.progressUpdateBlock(progress);
+                    }
+                });
+            
 			} completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, SDImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
 				
                 if (data) {
@@ -157,10 +159,6 @@ caption = _caption;
                 }else if(image){
                     self.underlyingImage = image;
                 }
-                
-//                if (image) {
-//                    self.underlyingImage = image;
-//                }
 				
 				[self performSelectorOnMainThread:@selector(imageLoadingComplete) withObject:nil waitUntilDone:NO];
 			}];
